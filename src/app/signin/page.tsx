@@ -1,42 +1,65 @@
 'use client';
 
+import Link from 'next/link';
 import { Activity, Lock, LogIn, UserRound, UserRoundPlus } from 'lucide-react';
 import { SiNaver } from 'react-icons/si'
 import { FcGoogle } from "react-icons/fc";
-import { useState, useTransition } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export interface LoginRequest {
+    username: string;
+    password: string;
+}
+
+export interface LoginResponse {
+    mid: string;
+    alias: string;
+}
 
 export default function SigninPage() {
 
-    const [credentials, setCredentials] = useState({ username: "", password: "" });
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCredentials({ ...credentials, [e.target.id]: e.target.value });
-    };
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [formData, setFormData] = useState({
+        userId: '',
+        pwd: '',
+        alias: ''
+    });
 
     const loginClick = async () => {
+
+        if (isLoading) return;
+
+        setIsLoading(true);
+
+        const username = formData.userId;
+        const password = formData.pwd;        
+
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(credentials),
+            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/login`;
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+                credentials: 'include',
             });
-            if (response.ok) {
-                const jwtToken = response.headers.get("Authorization");
-                if (jwtToken) {
-                    sessionStorage.setItem("jwtToken", jwtToken);
-                    sessionStorage.setItem("username", credentials.username);
-                }
+
+            console.log(resp);
+
+            if (resp.ok) {
+                alert('로그인 성공!');
+                router.push('/');
             } else {
-                alert("로그인 실패!");
+                alert('로그인에 실패했습니다. 다시 시도해주세요.');
             }
         } catch (error) {
-            console.error("로그인 오류!", error);
+            console.error('네트워크 에러:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
-
-    const signupClick = () => {
-
-    }
 
     return (
         <div className='w-full h-full flex flex-col justify-center items-center'>
@@ -67,14 +90,14 @@ export default function SigninPage() {
                     </div>
                     <button onClick={loginClick}
                         className="w-full h-12 text-md text-white font-bold text-lg rounded-2xl bg-blue-500 hover:bg-blue-700 transition-all">
-                        로 그 인
+                        {isLoading ? '처리 중...' : '로 그 인'}
                     </button>
                 </div>
                 <Link href={`/signup`} className="relative px-5">
                     <div className="absolute ml-5 inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                         <UserRoundPlus className="text-white" />
                     </div>
-                    <button onClick={signupClick}
+                    <button
                         className="w-full h-12 text-md text-white font-bold text-lg rounded-2xl bg-gray-500 hover:bg-gray-600 transition-all">
                         회원가입
                     </button>

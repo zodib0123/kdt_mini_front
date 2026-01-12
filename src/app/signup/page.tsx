@@ -2,21 +2,30 @@
 
 import { Activity, Lock, Undo2, UserRound, UserRoundPen, UserRoundPlus } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { saveUserInfo } from './actions'
 
 export default function SignupPage() {
 
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+
     const [formData, setFormData] = useState({
         userId: '',
-        password: '',
+        pwd: '',
         alias: ''
     });
 
     const [errors, setErrors] = useState({
         userId: '',
-        password: '',
+        pwd: '',
         alias: ''
     });
+
+    const isFormValid =
+        Object.values(formData).every(value => value.trim() !== '') &&
+        Object.values(errors).every(error => error === '');
 
     const validate = (name: string, value: string) => {
         let error = '';
@@ -25,7 +34,7 @@ export default function SignupPage() {
             if (!idRegex.test(value)) {
                 error = '아이디는 6~12자의 영문 소문자, 숫자만 가능합니다.';
             }
-        } else if (name === 'password') {
+        } else if (name === 'pwd') {
             const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,18}$/;
             if (!pwRegex.test(value)) {
                 error = '비밀번호는 8~18자, 대문자/소문자/숫자/특수문자를 각각 포함해야 합니다.';
@@ -43,6 +52,30 @@ export default function SignupPage() {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
         validate(name, value); // 입력 시 실시간 검증
+    };
+
+    const handleSubmit = async () => {
+        if (!isFormValid || isLoading) return;
+
+        setIsLoading(true);
+        try {
+            const result = await saveUserInfo({
+                mid: formData.userId,
+                pwd: formData.pwd,
+                alias: formData.alias
+            });
+
+            if (result) {
+                alert('회원가입이 완료되었습니다!');
+                router.push('/signin');
+            } else {
+                alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -69,24 +102,28 @@ export default function SignupPage() {
                                 ${errors.userId ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                         />
                     </div>
-                    {errors.userId && <p className="text-red-500 text-xs pl-2">{errors.userId}</p>}
+                    <div className="flex justify-start pl-10 h-2">
+                        {errors.userId && <p className="text-red-500 text-xs pl-2">{errors.userId}</p>}
+                    </div>
                 </div>
                 <div className="flex flex-col gap-1">
                     <div className="relative px-5">
                         <div className="absolute ml-5 inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                             <Lock className="text-gray-400" />
                         </div>
-                        <input name="password"
+                        <input name="pwd"
                             type="password"
-                            placeholder="Password"
-                            value={formData.password}
+                            placeholder="pwd"
+                            value={formData.pwd}
                             onChange={handleChange}
                             className={`w-full h-12 pl-12 text-lg px-3 border-2 border-gray-200 rounded-2xl focus:outline-none
                                 focus:border-blue-500  active:border-blue-500 transition-all
-                                ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
+                                ${errors.pwd ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                         />
                     </div>
-                    {errors.password && <p className="text-red-500 text-xs pl-2">{errors.password}</p>}
+                    <div className="flex justify-start pl-10 h-2">
+                        {errors.pwd && <p className="text-red-500 text-xs pl-2">{errors.pwd}</p>}
+                    </div>
                 </div>
                 <div className="flex flex-col gap-1">
                     <div className="relative px-5">
@@ -103,23 +140,32 @@ export default function SignupPage() {
                                 ${errors.alias ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
                         />
                     </div>
-                    {errors.alias && <p className="text-red-500 text-xs pl-2">{errors.alias}</p>}
+                    <div className="flex justify-start pl-10 h-2">
+                        {errors.alias && <p className="text-red-500 text-xs pl-2">{errors.alias}</p>}
+                    </div>
                 </div>
                 <div className='grid grid-cols-2 gap-5 px-5'>
                     <div className="relative">
-                        <div className="absolute ml-5 inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                        <div className="absolute ml-5 inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
                             <UserRoundPlus className="text-white" />
                         </div>
-                        <button className="w-full h-12 pl-5 text-md text-white font-bold text-lg rounded-2xl bg-blue-400 hover:bg-blue-500 transition-all">
-                            회원가입
+                        <button
+                            onClick={handleSubmit}
+                            disabled={!isFormValid || isLoading}
+                            className={`w-full h-12 pl-5 text-md text-white font-bold text-lg rounded-2xl transition-all 
+                                ${isFormValid
+                                    ? 'bg-blue-400 hover:bg-blue-500 cursor-pointer'
+                                    : 'bg-gray-300 cursor-not-allowed opacity-70'}`}
+                        >
+                            {isLoading ? '처리 중...' : '회원가입'}
                         </button>
                     </div>
                     <Link href={`/signin`}
-                        className="relative">
+                        className="relative ">
                         <div className="absolute ml-5 inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                             <Undo2 className="text-white" />
                         </div>
-                        <button className="w-full h-12 pl-5 text-md text-white font-bold text-lg rounded-2xl bg-red-400 hover:bg-red-500 transition-all">
+                        <button className="w-full h-12 pl-5 text-md text-white font-bold text-lg rounded-2xl bg-red-400 hover:bg-red-500 transition-all cursor-pointer">
                             뒤로가기
                         </button>
                     </Link>

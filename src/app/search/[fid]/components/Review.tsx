@@ -44,7 +44,7 @@ export default function ({ fid, star }: ReviewProps) {
         if (!fid) return;
 
         try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/review/get?fid=${encodeURIComponent(fid)}`;
+            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/review?fid=${encodeURIComponent(fid)}`;
             const resp = await fetch(url, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
