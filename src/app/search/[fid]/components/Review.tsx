@@ -1,11 +1,12 @@
 'use client';
 
 import { MessageSquare, Send, Star, Trash2 } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, startTransition } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { addReview, deleteReview } from '../actions'
 
 interface ReviewProps {
-    fid: string;
+    fid: number;
     star: number;
 }
 
@@ -59,7 +60,6 @@ export default function ({ fid, star }: ReviewProps) {
 
             if (resp.ok) {
                 const data = await resp.json();
-                console.log(data);
                 setTData(data);
             }
         } catch (error) {
@@ -73,21 +73,53 @@ export default function ({ fid, star }: ReviewProps) {
 
     const handleSubmitReview = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!isLoggedIn) {
-            alert("로그인이 필요합니다.");
-            return;
+        if (window.confirm('리뷰를 등록하시겠습니까?')) {
+            if (!isLoggedIn && !mid) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+            if (!newComment.trim()) return;
+
+            startTransition(async () => {
+                const params = {
+                    fid: fid,
+                    mid: mid!,
+                    cont: newComment,
+                    star: newRating,
+                };
+
+                const result = await addReview(params);
+
+                if (result) {
+                    setNewComment('');
+                    setNewRating(5);
+
+                    await handleReviewLoad();
+                }
+            });
         }
-        if (!newComment.trim()) return;
-        
-        console.log("리뷰 등록!");
-        // fetch 진행 예정
     };
 
-    const handleDeleteReview = (e: React.FormEvent) => {
-        e.preventDefault(); 
+    const handleDeleteReview = (
+        e: React.MouseEvent<HTMLButtonElement>,
+        reviewMid: string,
+        seq: number
+    ) => {
+        e.preventDefault();
+        if (window.confirm('리뷰를 삭제하시겠습니까?')) {
+            if (reviewMid != mid) {
+                alert("해당 리뷰 작성자만 삭제할 수 있습니다.");
+                return;
+            }
 
-        console.log("리뷰 삭제!");
-        // fetch 진행 예정
+            startTransition(async () => {
+                const result = await deleteReview(seq);
+
+                if (result) {
+                    await handleReviewLoad();
+                }
+            });
+        }
     }
 
     const getFillPercent = (index: number) => {
@@ -145,10 +177,10 @@ export default function ({ fid, star }: ReviewProps) {
                         onChange={(e) => setNewComment(e.target.value)}
                         disabled={!isLoggedIn}
                         placeholder={isLoggedIn ? "시설 이용 후기를 남겨주세요..." : ""}
-                        className={`w-full p-5 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none min-h-25 transition-all
+                        className={`w-full p-5 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none min-h-25 transition-all resize-none
                             ${!isLoggedIn ? 'blur-sm select-none' : ''}`}
                     />
-                    
+
                     <button
                         type="submit"
                         disabled={!isLoggedIn}
@@ -162,7 +194,7 @@ export default function ({ fid, star }: ReviewProps) {
                     {!isLoggedIn && (
                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/30 backdrop-blur-[2px] transition-all">
                             <p className="text-gray-800 font-bold mb-3">로그인 후 리뷰 작성이 가능합니다</p>
-                            <button 
+                            <button
                                 onClick={() => window.location.href = '/signin'}
                                 className="px-6 py-2 bg-blue-600 text-white rounded-full text-sm font-bold hover:bg-blue-700 shadow-md transition-colors"
                             >
@@ -191,11 +223,12 @@ export default function ({ fid, star }: ReviewProps) {
                                 </div>
                             </div>
                             <div className='flex-1'>
-                                <p className="text-md text-gray-600 leading-relaxed pl-10">{review.cont}</p>
+                                <p className="text-md text-gray-600 leading-relaxed pl-10 mr-10">{review.cont}</p>
                             </div>
-                            <button 
-                                onClick={handleDeleteReview}
-                                className='flex w-20 p-2 justify-end'>
+                            <button
+                                disabled={mid==review.mid ? false : true}
+                                onClick={(e) => handleDeleteReview(e, review.mid, review.seq)}
+                                className='flex p-2 justify-end rounded-xl hover:bg-gray-200 transition-all z-10'>
                                 <Trash2 className='text-gray-500' />
                             </button>
                         </div>

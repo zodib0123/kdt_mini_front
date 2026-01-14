@@ -1,4 +1,5 @@
 
+import { Suspense } from "react";
 import { FacilityType } from "@/type/FacilityType";
 import { notFound } from "next/navigation";
 import { ChevronLeft, Clock, Info, Map, MapIcon, MapPin, MessageSquare, Phone, Send, ShieldCheck, Star, Trophy } from "lucide-react";
@@ -7,11 +8,11 @@ import Review from "./components/Review";
 import BackToSearch from "./components/BackToSearch";
 
 interface FacilityDetailProps {
-    params: Promise<{ fid: string }>
+    params: Promise<{ fid: number }>
     onBack: () => void
 }
 
-export async function getFacilityDetail(fid: string): Promise<FacilityType | null> {
+export async function getFacilityDetail(fid: number): Promise<FacilityType | null> {
     if (!fid) return null;
 
     try {

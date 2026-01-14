@@ -10,7 +10,7 @@ export default function BackToSearch() {
     return (
         <button
             onClick={() => router.push(`/search?${params.toString()}`)}
-            className="p-2 rounded-xl border border-gray-300 hover:bg-gray-50"
+            className="p-2 rounded-xl border border-gray-300 hover:bg-gray-200 transition-all"
         >
             <ChevronLeft />
         </button>

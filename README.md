@@ -5,6 +5,7 @@
  2. "/search/detail" page 수정
    - review 작성 div 추가
    - 로그인 시 review 작성 가능. 로그인 되어있지않으면 input 블러 처리.
+   - 리뷰 추가, 리뷰 삭제 구현 (작성한 사용자만 삭제 가능)
  3. "/dashboard" page 수정
    - 시설 검색 input 이벤트 추가.
  4. "/search" page 수정
