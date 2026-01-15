@@ -1,7 +1,7 @@
 'use client';
 
 import { History, AlertTriangle } from 'lucide-react';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import {useMemo } from 'react';
 
 type DateType = {
     new: number;
@@ -10,48 +10,20 @@ type DateType = {
     city: string;
 };
 
-export default function SafetyPeriod({ city }: { city: string }) {
-    const [tdata, setTData] = useState<DateType | null>(null);
-    
+export default function SafetyPeriod({ data }: { data: any }) {
     const ageData = useMemo(() => {
-        if (!tdata) return [];
-
-        const buckets = [
-            { label: '신축 (10년내)', count: tdata.new, color: 'bg-blue-500' },
-            { label: '보통 (10-25년)', count: tdata.mid, color: 'bg-indigo-400' },
-            { label: '노후 (25년이상)', count: tdata.old, color: 'bg-amber-500' },
+        if (!data) return [];
+        return [
+            { label: '신축 (10년내)', count: data.new, color: 'bg-blue-500' },
+            { label: '보통 (10-25년)', count: data.mid, color: 'bg-indigo-400' },
+            { label: '노후 (25년이상)', count: data.old, color: 'bg-amber-500' },
         ];
-        return buckets;
-    }, [tdata]);
+    }, [data]);
 
     const totalValue = useMemo(() => {
-        if (!tdata) return 0;
-        return tdata.new + tdata.mid + tdata.old;
-    }, [tdata]);
-
-    const handlePeriodLoad = useCallback(async () => {
-        if (!city) return;
-
-        try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/count/old?city=${encodeURIComponent(city)}`;
-            const resp = await fetch(url, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                cache: 'no-store'
-            });
-
-            if (resp.ok) {
-                const result: DateType = await resp.json();
-                setTData(result);
-            }
-        } catch (error) {
-            console.error('Error fetching period data:', error);
-        }
-    }, [city]);
-
-    useEffect(() => {
-        handlePeriodLoad();
-    }, [handlePeriodLoad]);
+        if (!data) return 0;
+        return data.new + data.mid + data.old;
+    }, [data]);
 
     return (
         <div className=" mt-5 pt-5 border-t border-gray-100">

@@ -1,67 +1,80 @@
 "use server";
 
 import { FacilityType } from "@/type/FacilityType";
+import { ProvinceType } from "@/type/ProvinceType";
 
 export interface Pageable {
-    pageNumber: number;
-    pageSize: number;
-    sort: {
-        empty: boolean;
-        sorted: boolean;
-        unsorted: boolean;
-    };
-    offset: number;
-    paged: boolean;
-    unpaged: boolean;
+  pageNumber: number;
+  pageSize: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  offset: number;
+  paged: boolean;
+  unpaged: boolean;
 }
 
 export interface FacilityResponse {
-    facility: {
-        content: FacilityType[];
-        pageable: Pageable;
-        last: boolean;
-        totalElements: number;
-        totalPages: number;
-        first: boolean;
-        numberOfElements: number;
-        size: number;
-        number: number;
-        sort: {
-            empty: boolean;
-            sorted: boolean;
-            unsorted: boolean;
-        };
-        empty: boolean;
+  facility: {
+    content: FacilityType[];
+    pageable: Pageable;
+    last: boolean;
+    totalElements: number;
+    totalPages: number;
+    first: boolean;
+    numberOfElements: number;
+    size: number;
+    number: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
     };
+    empty: boolean;
+  };
 }
 
 export type SortOption = "name," | "star" | "createDate";
 
 export interface GetFacilitiesRequest {
-    name?: string;
-    city?: string;
-    gugun?: string;
-    type?: string;
-    sort: SortOption;
-    pageNo: number;
+  name?: string;
+  city?: string;
+  gugun?: string;
+  type?: string;
+  sort: SortOption;
+  pageNo: number;
 }
 
 type districtData = {
-  city : string,
-  city_count_total : number,
-  number_of_guguns : number,
-  erdsgn : number,
-  avg_old : number,
+  city: string,
+  provinceData: ProvinceType,
 };
 
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_KEY;
 
-export async function generateAnalysis({city, city_count_total, number_of_guguns, erdsgn, avg_old} : districtData): Promise<{ ok: boolean; data?: string; error?: string }> {
+// gemini api 연결 action
+export async function generateAnalysis({ city, provinceData }: districtData): Promise<{ ok: boolean; data?: string; error?: string }> {
+  const { city_count_total, number_of_guguns, erdsgn, avg_old } = provinceData;
+
   if (!apiKey) {
     return { ok: false, error: "Google Generative AI Key is missing" };
   }
 
-  const prompt = `너는 도시 인프라 안전 진단 및 공공 정책 전문가야. "${city} 행정 구역의 현황 : 시설 ${city_count_total}개, ${number_of_guguns}개 관할구역. 내진설계 시설 ${erdsgn}개, 시설 노후도 ${avg_old}%" 이 데이터를 분석하여 ${city}의 '공공 체육 시설 안전 진단 리포트'를 3문장 이내로 작성해줘.`
+  const prompt = `
+    너는 도시 인프라 및 공공 안전 정책 전문가야. 
+    다음은 ${city}의 공공 체육 시설 데이터 분석 결과야:
+    - 총 시설 수: ${city_count_total}개 (${number_of_guguns}개 구역 분산)
+    - 내진 설계 적용: ${erdsgn}개 시설
+    - 시설 평균 노후도: ${avg_old}%
+
+    이 지표를 바탕으로 ${city}의 '공공 체육 시설 안전 리포트'를 아래 조건에 맞춰 3문장으로 작성해줘:
+    1. 첫 문장은 시설 보유량 대비 내진 설계 비율을 근거로 한 현재의 안전 등급을 평가할 것.
+    2. 두 문장째는 노후도(${avg_old}%)를 기반으로 향후 필요한 유지보수 방향성을 제시할 것.
+    3. 마지막은 시민들이 안심하고 이용할 수 있는 시설 관리 체계에 대해 전문가적 제언을 할 것.
+    4. 문장은 신뢰감 있고 간결한 '평어체(하게/임/함)' 또는 '경어체(입니다)' 중 하나로 통일할 것.
+    `;
   const maxRetries = 3;
   const retryDelay = 1000; // 1 second
 
@@ -114,36 +127,120 @@ export async function generateAnalysis({city, city_count_total, number_of_guguns
   return { ok: false, error: "Failed to generate analisis after multiple retries." };
 }
 
+// 상세검색 action
 export async function getFacilities(params: GetFacilitiesRequest): Promise<FacilityResponse | null> {
-    const { name, city, gugun, type, sort, pageNo } = params;
+  const { name, city, gugun, type, sort, pageNo } = params;
 
-    const queryParams = new URLSearchParams({
-        pageNo: pageNo.toString(),
-        sort: sort,
+  const queryParams = new URLSearchParams({
+    pageNo: pageNo.toString(),
+    sort: sort,
+  });
+
+  if (name) queryParams.append("name", name);
+  if (city) queryParams.append("city", city);
+  if (gugun) queryParams.append("gugun", gugun);
+  if (type) queryParams.append("type", type);
+
+  try {
+    const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/facility?${queryParams.toString()}`;
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store'
     });
 
-    if (name) queryParams.append("name", name);
-    if (city) queryParams.append("city", city);
-    if (gugun) queryParams.append("gugun", gugun);
-    if (type) queryParams.append("type", type);
-
-    console.log("pageNo : " + pageNo + " / sort : " + sort);
-
-    try {
-        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/facility?${queryParams.toString()}`;
-        const resp = await fetch(url, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            cache: 'no-store'
-        });
-
-        if (resp.ok) {
-            return await resp.json();
-        }
-        console.error(`Error fetching facility lists: ${resp.statusText}`);
-        return null;
-    } catch (error) {
-        console.error('Error fetching facility lists:', error);
-        return null;
+    if (resp.ok) {
+      return await resp.json();
     }
+    console.error(`Error fetching facility lists: ${resp.statusText}`);
+    return null;
+  } catch (error) {
+    console.error('Error fetching facility lists:', error);
+    return null;
+  }
+}
+
+// 행정구역 간략 조회 action
+export async function getProvinceStats(city: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const url = `${baseUrl}/count/erdsgn?city=${encodeURIComponent(city)}`;
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch (error) {
+    console.error("[Server Fetch] Error:", error);
+    return null;
+  }
+}
+
+// 행정구역 chart data 조회 action
+export async function getProvinceChartData(city: string) {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/count?city=${encodeURIComponent(city)}`;
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+
+    if (!resp.ok) {
+      console.error(`[Server Fetch] Failed: ${resp.status}`);
+      return null;
+    }
+
+    return await resp.json();
+  } catch (error) {
+    console.error("[Server Fetch] Error:", error);
+    return null;
+  }
+}
+
+// 행정구역 노후도 조회 action
+export async function getSafetyPeriodData(city: string) {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/count/old?city=${encodeURIComponent(city)}`;
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+
+    if (!resp.ok) {
+      console.error(`[Server Fetch] Failed: ${resp.status}`);
+      return null;
+    }
+
+    return await resp.json();
+  } catch (error) {
+    console.error("[Server Fetch] Error:", error);
+    return null;
+  }
+}
+
+// 지도에 표시할 전국 시설 수 데이터 action
+export async function getAllProvinceCounts() {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/count`;
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+
+    if (!resp.ok) {
+      console.error(`[Server Fetch] Failed: ${resp.status}`);
+      return null;
+    }
+
+    return await resp.json();
+  } catch (error) {
+    console.error("[Server Fetch] Error:", error);
+    return null;
+  }
 }

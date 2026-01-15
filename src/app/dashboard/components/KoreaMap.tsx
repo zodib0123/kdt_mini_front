@@ -27,6 +27,8 @@ interface KoreaMapProps {
 export default function KoreaMap({onProvinceClick, selectedProvince, facilityCount} : KoreaMapProps) {
     const [geoData, setGeoData] = useState<any>(null);
 
+    //console.log(facilityCount);
+
     useEffect(() => {
         fetch('/maps/skorea-provinces-topo-simple.json')
             .then((res) => res.json())

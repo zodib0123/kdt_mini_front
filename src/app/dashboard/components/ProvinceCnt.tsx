@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from "react";
-import { Dumbbell, History, MapIcon, ShieldCheck, Trophy } from 'lucide-react';
-
+import React from "react";
+import { Dumbbell, History, MapIcon, ShieldCheck } from 'lucide-react';
 
 const StatBox = ({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) => {
     const colors: Record<string, string> = {
@@ -26,61 +25,18 @@ const StatBox = ({ icon, label, value, color }: { icon: React.ReactNode; label: 
     );
 };
 
-type dataType = {
-    number_of_guguns: number,
-    city: string,
-    city_count_total: number,
-    erdsgn: number,
-    avg_old: number,
-}
-
-interface ProvinceCntProps {
-    city: string;
-    onDataLoad?: (data: dataType) => void;
-}
-
-export default function ProvinceCnt({ city, onDataLoad }: ProvinceCntProps) {
-
-    const [tdata, setTData] = useState<dataType | null>(null);
-    const [erdPercent, setErdPercent] = useState<string>();
-
-    // 메모이제이션 
-    const handleProvinceLoad = useCallback(async () => {
-        if (!city) return;
-
-        try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/count/erdsgn?city=${encodeURIComponent(city)}`;
-            const resp = await fetch(url, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                cache: 'no-store'
-            });
-
-            if (resp.ok) {
-                const data = await resp.json();
-                setTData(data);
-                const percent = ((data.erdsgn / data.city_count_total) * 100).toFixed(1);
-                setErdPercent(percent);
-
-                if (onDataLoad) {
-                    onDataLoad(data);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching province data:', error);
-        }
-    }, [city, onDataLoad]);
-
-    useEffect(() => {
-        handleProvinceLoad();
-    }, [handleProvinceLoad]);
+export default function ProvinceCnt({ provinceData }: { provinceData: any }) {
+    
+    const erdPercent = provinceData?.city_count_total 
+        ? ((provinceData.erdsgn / provinceData.city_count_total) * 100).toFixed(1) 
+        : "0";
 
     return (
         <div className="flex flex-wrap gap-4">
-            <StatBox icon={<Dumbbell />} label="총 시설수" value={`${tdata?.city_count_total.toLocaleString() ?? 0} 개`} color="blue" />
-            <StatBox icon={<MapIcon />} label="관할 구역" value={`${tdata?.number_of_guguns.toLocaleString() ?? 0} 개 구역`} color="indigo" />
+            <StatBox icon={<Dumbbell />} label="총 시설수" value={`${(provinceData.city_count_total || 0).toLocaleString()} 개`} color="blue" />
+            <StatBox icon={<MapIcon />} label="관할 구역" value={`${(provinceData.number_of_guguns || 0).toLocaleString()} 개 구역`} color="indigo" />
             <StatBox icon={<ShieldCheck />} label="내진설계율" value={`${erdPercent ?? "0"} %`} color="green" />
-            <StatBox icon={<History />} label="평균 준공 연차" value={`${tdata?.avg_old ?? 0} 년`} color="orange" />
+            <StatBox icon={<History />} label="평균 준공 연차" value={`${(provinceData.avg_old || 0)} 년`} color="orange" />
         </div>
     );
 }

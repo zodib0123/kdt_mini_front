@@ -59,8 +59,6 @@ export async function getFacilities(params: GetFacilitiesRequest): Promise<Facil
     if (gugun) queryParams.append("gugun", gugun);
     if (type) queryParams.append("type", type);
 
-    console.log("pageNo : " + pageNo + " / sort : " + sort);
-
     try {
         const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/facility?${queryParams.toString()}`;
         const resp = await fetch(url, {

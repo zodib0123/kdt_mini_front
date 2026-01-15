@@ -1,11 +1,11 @@
 
-import { Suspense } from "react";
 import { FacilityType } from "@/type/FacilityType";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Clock, Info, Map, MapIcon, MapPin, MessageSquare, Phone, Send, ShieldCheck, Star, Trophy } from "lucide-react";
+import { Clock, Info, Map, MapPin, Phone, ShieldCheck, Trophy } from "lucide-react";
 import Link from "next/link";
 import Review from "./components/Review";
 import BackToSearch from "./components/BackToSearch";
+import InfoItem from "./components/InfoItem";
 
 interface FacilityDetailProps {
     params: Promise<{ fid: number }>
@@ -27,25 +27,12 @@ export async function getFacilityDetail(fid: number): Promise<FacilityType | nul
         if (resp.ok) {
             return await resp.json();
         }
-        //console.error(`Error fetching province stats: ${resp.statusText}`);
         return notFound();
     } catch (error) {
-        //console.error('Error fetching province stats:', error);
         return notFound();
     }
 }
 
-const InfoItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) => (
-    <div className="flex items-center gap-3">
-        <div className="p-3 bg-gray-50 rounded-xl">
-            {icon}
-        </div>
-        <div>
-            <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
-            <p className="text-sm font-bold text-gray-800">{value}</p>
-        </div>
-    </div>
-);
 
 export default async function FacilityDetail({ params }: FacilityDetailProps) {
 
@@ -64,9 +51,7 @@ export default async function FacilityDetail({ params }: FacilityDetailProps) {
     return (
         <div className="flex flex-col gap-6 fade-in slide-in-from-bottom-4 duration-500">
             <header className="flex items-center gap-4">
-                <Suspense fallback={null}>
-                    <BackToSearch />
-                </Suspense>
+                <BackToSearch />
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">{facility.type}</span>
@@ -122,7 +107,7 @@ export default async function FacilityDetail({ params }: FacilityDetailProps) {
                     </div>
                 </div>
             </div>
-            <Review fid={fid} star={facility.star} />
+            <Review fid={fid} star={facility.star}/>
         </div>
     );
 }

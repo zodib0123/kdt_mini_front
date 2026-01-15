@@ -8,7 +8,7 @@ import {
     ResponsiveContainer,
     Cell,
 } from 'recharts';
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { BarChart3, PieChartIcon, ChevronUp, ChevronDown } from "lucide-react";
 
 type BarChartItem = {
@@ -81,53 +81,25 @@ const CustomTooltip = ({ active, payload }: any) => {
     );
 };
 
-export default function FacilityChart({ city }: { city: string }) {
+export default function FacilityChart({ city, data }: { city: string, data: any }) {
     const [showAll, setShowAll] = useState(false);
-    const [provinces, setProvinces] = useState<PieChartItem[]>([]);
-    const [facilities, setFacilities] = useState<BarChartItem[]>([]);
 
-    const handleChartLoad = useCallback(async () => {
-        if (!city) return;
-        console.log(`${process.env.NEXT_PUBLIC_BACKEND_URL}/count?city=${city}`);
-        try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/count?city=${city}`;
-            const resp = await fetch(url, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                cache: 'no-store'
-            });
+    const { provinces, facilities } = useMemo(() => {
+        if (!data) return { provinces: [], facilities: [] };
 
-            if (resp.ok) {
-                const data = await resp.json();
-                console.log(data);
-                const formattedProvinces: PieChartItem[] = data.types_in_city_count.map(
-                    ([name, value]: [string, number]) => ({ name, value })
-                );
+        const formattedProvinces = data.types_in_city_count.map(
+            ([name, value]: [string, number]) => ({ name, value })
+        );
 
-                const formattedFacilities: BarChartItem[] = data.guguns_in_city_count.map(
-                    ([name, value]: [string, number]) => ({ name, value })
-                );
+        const formattedFacilities = data.guguns_in_city_count.map(
+            ([name, value]: [string, number]) => ({ name, value })
+        );
 
-                setProvinces(formattedProvinces);
-                setFacilities(formattedFacilities);
-            }
-        } catch (error) {
-            console.error('Error fetching province data:', error);
-        }
-    }, [city]);
+        return { provinces: formattedProvinces, facilities: formattedFacilities };
+    }, [data]);
 
-    useEffect(() => {
-        handleChartLoad();
-    }, [handleChartLoad]);
-
-    const barChartData = useMemo(() =>
-        sortedItem(facilities), [facilities]
-    );
-
-    const pieChartData = useMemo(
-        () => getTop7WithOthers(provinces),
-        [provinces]
-    );
+    const barChartData = useMemo(() => sortedItem(facilities), [facilities]);
+    const pieChartData = useMemo(() => getTop7WithOthers(provinces), [provinces]);
 
     const maxCount = useMemo(() => {
         return barChartData.length > 0 ? Math.max(...barChartData.map(s => s.value)) : 1;
