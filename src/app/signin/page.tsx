@@ -121,7 +121,7 @@ export default function SigninPage() {
                             <SiNaver className="text-white w-6 h-6" />
                         </div>
                         <div className="w-full h-12 text-md flex justify-center items-center text-white font-bold text-lg rounded-2xl bg-green-400 hover:bg-green-500 transition-all">
-                            <a href="http://10.125.121.185:8080/oauth2/authorization/naver" >
+                            <a href="http://10.125.121.185.nip.io:8080/oauth2/authorization/naver" >
                                 네이버 로그인
                             </a>
                         </div>

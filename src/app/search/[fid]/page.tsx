@@ -1,5 +1,5 @@
+'use client'
 
-import { Suspense } from "react";
 import { FacilityType } from "@/type/FacilityType";
 import { notFound } from "next/navigation";
 import { ChevronLeft, Clock, Info, Map, MapIcon, MapPin, MessageSquare, Phone, Send, ShieldCheck, Star, Trophy } from "lucide-react";
