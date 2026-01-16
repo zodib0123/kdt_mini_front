@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 export default function CallbackClient() {
@@ -15,12 +15,11 @@ export default function CallbackClient() {
         const mid = searchParams.get('mid')
         const token = searchParams.get('token')
 
-        if (!alias && !mid && !token) {
-            router.replace('/signin')
-            return;
-        } else {
-            login(alias!, mid!, token!);
+        if (alias && mid && token) {
+            login(alias, mid, token);
             router.replace('/');
+        } else {
+            router.replace('/signin');
         }
     }, [searchParams, router, login])
 
