@@ -1,4 +1,9 @@
 
+* 2026-01-16 업데이트
+ 1. "/signin" page 수정
+   - OAuth callback page server component 변경
+   - OAth url 환경변수 가져오게 변경
+
 * 2026-01-15 업데이트
  1. OAuth2 로그인 추가
    - 구글 로그인 추가

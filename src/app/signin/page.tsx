@@ -23,6 +23,8 @@ export default function SigninPage() {
         pwd: ''
     });
 
+    const oauthUrl = process.env.NEXT_PUBLIC_OAUTH_URL;
+
     const loginClick = async () => {
         if (isLoading) return;
         setIsLoading(true);
@@ -111,7 +113,7 @@ export default function SigninPage() {
                             <FcGoogle className="text-gray-400 w-9 h-9" />
                         </div>
                         <div className="w-full h-12 text-md flex justify-center items-center border-2 border-gray-200 text-gray-600 font-bold text-lg rounded-2xl bg-white hover:bg-gray-200 transition-all">
-                            <a href="http://10.125.121.185.nip.io:8080/oauth2/authorization/google">
+                            <a href={`${oauthUrl}/oauth2/authorization/google`}>
                                 구글 로그인
                             </a>
                         </div>
@@ -121,7 +123,7 @@ export default function SigninPage() {
                             <SiNaver className="text-white w-6 h-6" />
                         </div>
                         <div className="w-full h-12 text-md flex justify-center items-center text-white font-bold text-lg rounded-2xl bg-green-400 hover:bg-green-500 transition-all">
-                            <a href="http://10.125.121.185.nip.io:8080/oauth2/authorization/naver" >
+                            <a href={`${oauthUrl}/oauth2/authorization/naver`} >
                                 네이버 로그인
                             </a>
                         </div>
