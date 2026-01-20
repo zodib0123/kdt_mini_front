@@ -1,10 +1,17 @@
 
+* 2026-01-20 업데이트
+ 1. "/dashboard" page 수정
+   - barchart 더보기 버튼 이름 수정
+ 2. "/signin" page 수정
+   - 로그인 server action 추가 (actions.ts)
+
 * 2026-01-16 업데이트
  1. "/signin" page 수정
    - OAuth callback page server component 변경
    - OAth url 환경변수 가져오게 변경
  2. "/search/deatil" page 수정
    - 조회 Fetch actions.ts 로 이동
+   - 검색 실패, 검색 결과 0건 인 경우 화면 추가
  3. Auth 오류 수정
    - 페이지 리로드(F5) 시 token 못 읽어오는 오류 수정
  4. "/dashboard" page 수정

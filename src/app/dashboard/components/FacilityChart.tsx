@@ -135,7 +135,7 @@ export default function FacilityChart({ city, data }: { city: string, data: any 
                     {showAll ? (
                         <>접기 <ChevronUp size={14} /></>
                     ) : (
-                        <>전체 27개 종목 보기 <ChevronDown size={14} /></>
+                        <>전체 {barChartData.length}개 행정구역 보기 <ChevronDown size={14} /></>
                     )}
                 </button>
             </div>
