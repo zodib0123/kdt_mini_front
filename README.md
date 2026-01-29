@@ -5,7 +5,7 @@
 
 ## 🎬 데모 영상
 <div align="center">
-  <video src="[./test_video.mp4](https://github.com/zodib0123/kdt_mini_front/raw/refs/heads/main/test_video.mp4)" width="100%" controls title="Service Test Video"></video>
+  <video src="https://github.com/zodib0123/kdt_mini_front/raw/refs/heads/main/test_video.mp4" width="100%" controls title="Service Test Video"></video>
   <p>▲ 서비스 실행 테스트 영상 (test_video.mp4)</p>
 </div>
 
