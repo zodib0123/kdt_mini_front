@@ -6,8 +6,9 @@
 ## 🎬 데모 영상
 <div align="center">
   
-    https://github.com/zodib0123/kdt_mini_front/raw/refs/heads/main/test_video.mp4
+https://github.com/zodib0123/kdt_mini_front/raw/refs/heads/main/test_video.mp4
 
+▲ 서비스 실행 테스트 영상 (test_video.mp4)
 </div>
 
 ## 🛠 기술 스택 (Tech Stack)
