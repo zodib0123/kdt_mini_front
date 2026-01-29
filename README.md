@@ -63,5 +63,7 @@ graph LR
 
 ## 📖 문서
 - [프로젝트 데모 바로가기 (vercel)](https://kdt-mini-front.vercel.app/)
+- [백엔드 배포 (Render)](https://kdt03-miniproject-back.onrender.com)
+- [DB 배포] (https://supabase.com/dashboard/project/juxqoakzqrvszgudweea)
 - [백엔드 Github 주소](https://github.com/scatch1228/KDT03_MINIPROJECT_BACK)
 - [전국체육시설 공공데이터](https://www.bigdata-culture.kr/bigdata/user/data_market/detail.do?id=3b5399ad-88c4-43aa-a1d7-7ef6a630370b)
